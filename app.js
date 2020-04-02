@@ -9,6 +9,8 @@ var usersRouter = require('./routes/users');
 
 var app = express();
 
+var isLogin = false;
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -19,12 +21,27 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/home', (req, res, next) => {
-    res.render('home', {
-        name: "Dang",
-        age: 23,
-        car: ["BMV", "MER"]
-    })
+app.use('/home', (req, res, next) => {
+    if(isLogin) {
+        return res.render('home', {title: 'Logout'});
+    } else {
+        return res.render('home', {title: 'Login'});
+    }
+});
+
+app.post('/login', (req, res, next) => {
+    if (req.body.username == 'dang' && req.body.password == '1234') {
+        isLogin = true;
+        next();
+    } else {
+        next('Sai accout');
+    }
+}, (req, res, next) => {
+    return res.send('Dang nhap thanh cong');
+})
+
+app.use((err, req, res, next) => {
+    return res.json(err);
 })
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
